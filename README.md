@@ -1,4 +1,4 @@
-# ExpenseTracker 
+# 💰ExpenseTracker 
 
 A web-based **Expense Tracker** that allows users to **manage their income and expenses**, visualize financial data using **charts (Chart.js)**, and plan their budget effectively. Built with **Flask, MongoDB, HTML, CSS, and JavaScript**, this project helps users track their financial activities seamlessly.  
 
