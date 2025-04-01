@@ -17,8 +17,6 @@ A web-based **Expense Tracker** that allows users to **manage their income and e
 
 ## 📸 Screenshots  
 Here are some snapshots of the project:  
-### **User Credentials**
-![Credentials](static/images/Credentials.png)
 
 ### **Dashboard**  
 ![Dashboard](static/images/Dashboard.png)  
@@ -29,8 +27,6 @@ Here are some snapshots of the project:
 ### **Reports & Charts**  
 ![Reports](static/images/Reports.png)  
 
-### **Filter Management** 
-![Filtering](static/images/Filtering.png)
 ---
 
 ## 🚀 Installation & Setup  
