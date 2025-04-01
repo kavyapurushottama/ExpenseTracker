@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script src="https://kit.fontawesome.com/0f8804b7cd.js" crossorigin="anonymous"></script>
+    <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='images/favicon.svg') }}">
+</head>
+<body>
+    <div class="container">
+        <i class="fa-solid fa-dollar-sign", style="color:#e4b200; font-size: 30px;"></i>
+        <span class="brand-name" style="color: green; font-size: 30px;">Expense Tracker</span>
+            <div class="login-container"><br>
+            <br><h2><u>Register</u></h2><br>
+            <div class="login-form">
+                <form action="{{ url_for('register') }}" method="POST">
+                    <input type="text" name="username" placeholder="Username" required><br><br>
+                    <input type="email" name="email" placeholder="Email" required><br><br>
+                    <input type="password" name="password" placeholder="Password" required><br><br>
+                    <button type="submit">Register</button>
+                </form>
+            </div>
+            <p>Already have an account? <a href="{{ url_for('login') }}">Login</a></p>
+        </div>
+    </div>
+</body>
+</html>

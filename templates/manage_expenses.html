@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Expenses</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://kit.fontawesome.com/0f8804b7cd.js" crossorigin="anonymous"></script>
+    <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='images/favicon.svg') }}">
+</head>
+<body>
+    <nav>
+        <ul>
+        <li class="logo">
+            <i class="icon fa-solid fa-dollar-sign" style="color:#e4b200;"></i>
+            <span class="brand-name" style="color: green;">Expense Tracker</span>
+        </li>
+        <div class="nav-center">
+            <li><a href="{{ url_for('dashboard') }}">Dashboard</a></li>
+            <li><a href="{{ url_for('manage_expenses') }}">Expenses</a></li>
+            <li><a href="{{ url_for('plans') }}">Plans</a></li>
+            <li><a href="{{ url_for('reports') }}">Reports</a></li>
+        </div>
+        <li><a href="{{ url_for('logout') }}">Logout</a></li>
+        </ul>
+    </nav>
+
+    <div class="container">
+        <h2 class="title"><u>Expense Tracker</u></h2>
+
+        <div class="expense-container">
+            <form class="expense-form" action="{{ url_for('manage_expenses') }}" method="POST">
+                <select name="transaction_type" required>
+                    <option value="Credit">Credit (Income)</option>
+                    <option value="Debit">Debit (Expense)</option>
+                </select>
+                <input type="number" name="amount" placeholder="Amount" required>
+                <input type="text" name="category" placeholder="Category" required>
+                <input type="date" name="date" required>
+                <button type="submit" class="add-btn">Add Expense</button>
+            </form>
+        </div>
+
+        <!-- Expense Table -->
+        <div class="expense-list">
+            <div class="search-container" style="text-align: center; margin-bottom: 20px;">
+                <input type="text" id="search-bar" placeholder="Search">
+                <button id="search-btn" onclick="filterExpenses()"><i class="fas fa-search"></i></button>
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Expense Name</th>
+                        <th>Amount</th>
+                        <th>Category</th>
+                        <th>Date</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="expense-table-body"></tbody>
+            </table>
+        </div>
+        <div class="total-container">
+            <h3>Total Income: Rs {{ total_income }}</h3>
+            <h3>Total Expense: Rs {{ total_expense }}</h3>
+            <h3>Total Available Cash: Rs {{ total_cash }}</h3>
+        </div>
+        
+    </div>
+
+    <script>
+        function filterExpenses() {
+            let searchValue = document.getElementById("category-search-bar").value.toLowerCase().trim();
+            let rows = document.querySelectorAll("#expense-table-body tr");
+
+            rows.forEach(row => {
+                let categoryCell = row.querySelector("td:nth-child(3)"); // Category is the 3rd column
+                if (categoryCell) {
+                    let categoryText = categoryCell.textContent.toLowerCase();
+                    if (categoryText.includes(searchValue)) {
+                        row.style.display = "";  // Show matching row
+                    } else {
+                        row.style.display = "none"; // Hide non-matching row
+                    }
+                }
+            });
+        }
+
+        function handleEnter(event) {
+            if (event.key === "Enter") {
+                event.preventDefault();
+                filterExpenses();
+            }
+        }
+
+        document.addEventListener("DOMContentLoaded", function() {
+            document.getElementById("category-search-btn").addEventListener("click", filterExpenses);
+            document.getElementById("category-search-bar").addEventListener("keypress", handleEnter);
+        });
+
+
+        document.addEventListener("DOMContentLoaded", function () {
+            fetch("{{ url_for('get_expenses') }}")
+                .then(response => response.json())
+                .then(data => {
+                    const tableBody = document.getElementById("expense-table-body");
+                    tableBody.innerHTML = "";
+                    let totalIncome = 0;
+                    let totalExpense = 0;
+    
+                    const categoriesSet = new Set(); // Collect unique categories
+    
+                    data.forEach(transaction => {
+                        const row = document.createElement("tr");
+    
+                        // Create a custom attribute to help with filtering
+                        row.setAttribute("data-category", transaction.category);
+    
+                        row.innerHTML = `
+                            <td>${transaction.type}</td>
+                            <td>Rs ${transaction.amount.toFixed(2)}</td>
+                            <td>${transaction.category}</td>
+                            <td>${transaction.date}</td>
+                            <td>
+                                <button class="edit-btn">Edit</button>
+                                <button class="delete-btn" onclick="deleteExpense('${transaction._id}')">Delete</button>
+                            </td>
+                        `;
+                        tableBody.appendChild(row);
+    
+                        // Track totals
+                        if (transaction.type === "credit") {
+                            totalIncome += transaction.amount;
+                        } else if (transaction.type === "debit") {
+                            totalExpense += transaction.amount;
+                        }
+    
+                        categoriesSet.add(transaction.category || "Uncategorized");
+                    });
+    
+                    const totalCash = totalIncome - totalExpense;
+                    document.getElementById("total-amount").textContent = `Rs ${totalCash.toFixed(2)}`;
+    
+                    // Dynamically populate filter dropdown
+                    const categoryFilter = document.getElementById("category-filter");
+                    categoryFilter.innerHTML = `<option value="All">All</option>`;
+                    categoriesSet.forEach(cat => {
+                        const option = document.createElement("option");
+                        option.value = cat;
+                        option.textContent = cat;
+                        categoryFilter.appendChild(option);
+                    });
+    
+                    // 🔥 FILTER FUNCTIONALITY
+                    categoryFilter.addEventListener("change", function () {
+                        const selectedCategory = this.value;
+                        const rows = tableBody.getElementsByTagName("tr");
+    
+                        Array.from(rows).forEach(row => {
+                            const rowCategory = row.getAttribute("data-category");
+                            if (selectedCategory === "All" || rowCategory === selectedCategory) {
+                                row.style.display = "";
+                            } else {
+                                row.style.display = "none";
+                            }
+                        });
+                    });
+    
+                })
+                .catch(error => console.error("Error:", error));
+        });
+    
+        function deleteExpense(expenseId) {
+            if (confirm("Are you sure you want to delete this expense?")) {
+                fetch(`{{ url_for('delete_expense', expense_id='') }}${expenseId}`, {
+                    method: "POST"
+                })
+                .then(() => location.reload());
+            }
+        }
+    </script>
+</body>
+</html>

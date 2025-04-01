@@ -1,0 +1,75 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Expense Reports</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://kit.fontawesome.com/0f8804b7cd.js" crossorigin="anonymous"></script> 
+    <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='images/favicon.svg') }}">
+</head>
+<body>
+    <nav>
+        <ul>
+        <li class="logo">
+            <i class="icon fa-solid fa-dollar-sign" style="color:#e4b200;"></i>
+            <span class="brand-name" style="color: green;">Expense Tracker</span>
+        </li>
+        <div class="nav-center">
+            <li><a href="{{ url_for('dashboard') }}">Dashboard</a></li>
+            <li><a href="{{ url_for('manage_expenses') }}">Expenses</a></li>
+            <li><a href="{{ url_for('plans') }}">Plans</a></li>
+            <li><a href="{{ url_for('reports') }}">Reports</a></li>
+        </div>
+        <li><a href="{{ url_for('logout') }}">Logout</a></li>
+    </ul>
+    </nav>
+
+    <div class="container">
+        <h2><u>Expense Reports</u></h2><br>
+        <div class="charts-wrapper">
+            <div class="chart-container">
+                <h3>Daily Expense Chart</h3>
+                <canvas id="pieChart"></canvas>
+            </div>
+            <div class="chart-container">
+                <h3>Monthly Expense Chart</h3><br>
+                <canvas id="barChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pass category_totals & monthly_expenses as JSON -->
+    <script>
+        const monthlyExpenses = JSON.parse('{{ monthly_expenses | tojson | safe }}') || {};
+        const yearlyExpenses = JSON.parse('{{ yearly_expenses | tojson | safe }}') || {};
+        const categoryTotals = JSON.parse('{{ category_totals | tojson | safe }}') || {};
+        const labels = Object.keys(categoryTotals);
+        const values = Object.values(categoryTotals);
+        new Chart(document.getElementById("pieChart"), {
+            type: "pie",
+            data: {
+                labels: labels,
+                datasets: [{
+                    data: values,
+                }]
+            }
+            
+        });
+        new Chart(document.getElementById("barChart"), {
+            type: "bar",
+            data: {
+                labels: Object.keys(monthlyExpenses),
+                datasets: [{
+                    label: "Monthly Expenses",
+                    data: Object.values(monthlyExpenses),
+                }]
+            }
+        });
+    </script>
+
+    <script src="{{ url_for('static', filename='js/reports.js') }}"></script>
+</body>
+</html>

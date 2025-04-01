@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> <!-- Chart.js for graphs -->
+    <script src="https://kit.fontawesome.com/0f8804b7cd.js" crossorigin="anonymous"></script>
+    <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='images/favicon.svg') }}">
+</head>
+<body>
+    <nav>
+        <ul>
+        <li class="logo">
+            <i class="icon fa-solid fa-dollar-sign" style="color:#e4b200;"></i>
+            <span class="brand-name" style="color: green;">Expense Tracker</span>
+        </li>
+        <div class="nav-center">
+            <li><a href="{{ url_for('dashboard') }}">Dashboard</a></li>
+            <li><a href="{{ url_for('manage_expenses') }}">Expenses</a></li>
+            <li><a href="{{ url_for('plans') }}">Plans</a></li>
+            <li><a href="{{ url_for('reports') }}">Reports</a></li>
+        </div>
+        <li><a href="{{ url_for('logout') }}">Logout</a></li>
+    </ul>
+    </nav>
+    
+    <div class="container">
+
+        <h2><u>Welcome to the Dashboard</u></h2><br>
+        <h3>Total Cash: Rs <span id="total-cash">0</span></h3>
+        <!-- Pie Chart Section -->
+        <div class="chart-container">
+            <canvas id="cashChart"></canvas>
+        </div>
+        <p id="cash-warning" style="color: red; font-weight: bold;"></p>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            fetch("{{ url_for('get_expenses') }}")
+                .then(response => response.json())
+                .then(data => {
+                    let totalCredits = 0;
+                    let totalDebits = 0;
+
+                    data.forEach(transaction => {
+                        if (transaction.type === "Credit") {
+                            totalCredits += transaction.amount;
+                        } else if (transaction.type === "Debit") {
+                            totalDebits += transaction.amount;
+                        }
+                    });
+
+                    let totalCash = totalCredits - totalDebits;
+                    document.getElementById("total-cash").textContent = `Rs ${totalCash}`;
+
+                    // Show warnings if cash is low
+                    if (totalCash <= 0) {
+                        document.getElementById("cash-warning").textContent = "⚠️ Warning! Your balance is 0 or negative.";
+                    } else if (totalCash < totalCredits * 0.10) {
+                        document.getElementById("cash-warning").textContent = "⚠️ Warning! You have used more than 90% of your cash!";
+                    } else if (totalCash < totalCredits * 0.50) {
+                        document.getElementById("cash-warning").textContent = "⚠️ Warning! You have used more than 50% of your cash.";
+                    }
+                    generateCashChart(totalCash, totalDebits);
+                })
+                .catch(error => console.error("Error:", error));
+        });
+
+        function generateCashChart(totalCredits, totalDebits) {
+            new Chart(document.getElementById("cashChart"), {
+                type: "pie",
+                data: {
+                    labels: ["Spent", "Savings" ],
+                    datasets: [{
+                        data: [totalDebits, totalCredits],
+                        backgroundColor: ["#FF5733", "#4CAF50" ]
+                    }]
+                }
+            });
+        }
+    </script>
+</body>
+</html>
+
+
+
+

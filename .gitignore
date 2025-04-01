@@ -1,0 +1,13 @@
+# Ignore Python environment & dependencies
+venv/
+__pycache__/
+*.pyc
+*.pyo
+
+# Ignore environment variables & credentials
+.env
+config.py  # If it contains sensitive data
+
+# Ignore large uploaded files
+static/uploads/
+*.log
