@@ -6,7 +6,7 @@ __pycache__/
 
 # Ignore environment variables & credentials
 .env
-config.py  # If it contains sensitive data
+config.py  
 
 # Ignore large uploaded files
 static/uploads/
